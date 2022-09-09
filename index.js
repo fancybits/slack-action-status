@@ -7,7 +7,7 @@ process.on('unhandledRejection', handleError)
 main().catch(handleError)
 
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 function durationToString(seconds) {
@@ -18,9 +18,9 @@ function durationToString(seconds) {
   seconds = Math.round(seconds)
 
   if (hours > 0) {
-    return `${hours}h ${minutes}m ${seconds}s`
+    return `${hours}h${minutes}m${seconds}s`
   } else if (minutes > 0) {
-    return `${minutes}m ${seconds}s`
+    return `${minutes}m${seconds}s`
   } else {
     if (seconds < 1) {
       seconds = 1
@@ -169,10 +169,8 @@ async function monitor({importantSteps, github, deployDescription, stepIdentifie
     console.log(message)
 
     if (messageTs) {
-      // await slack.chat.update({ ts: messageTs, channel: slackChannel, text: message, blocks: formatMessage({description, active, completed, logUrl}) })
       await slack.chat.update({ ts: messageTs, channel: slackChannel, attachments: [{ color, fallback: message, blocks: formatMessage({description, active, completed, logUrl}) }] })
     } else {
-      // let response = await slack.chat.postMessage({ channel: slackChannel, text: message, blocks: formatMessage({description, active, completed, logUrl}) })
       let response = await slack.chat.postMessage({ channel: slackChannel, attachments: [{ color, fallback: message, blocks: formatMessage({description, active, completed, logUrl}) }] })
       core.debug(`response = ${util.inspect(response, { depth: 8 })}`)
       messageTs = response.ts
