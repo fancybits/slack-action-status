@@ -11,11 +11,11 @@ function sleep(ms) {
 }
 
 function durationToString(seconds) {
+  seconds = Math.round(seconds)
   const hours = Math.floor(seconds / 3600)
   seconds -= hours * 3600
   const minutes = Math.floor(seconds / 60)
   seconds -= minutes * 60
-  seconds = Math.round(seconds)
 
   if (hours > 0) {
     return `${hours}h${minutes}m${seconds}s`
@@ -84,7 +84,7 @@ function formatMessage({description, active, completed, logUrl}) {
   return blocks
 }
 
-async function monitor({importantSteps, github, logJobName, deployDescription, stepIdentifier, slack, slackChannel}) {
+async function monitor({importantSteps, github, logJobName, deployDescription, stepIdentifier, slack, slackChannel, longJobDuration}) {
   let messageTs = null
 
   while (true) {
@@ -153,10 +153,10 @@ async function monitor({importantSteps, github, logJobName, deployDescription, s
       }
     }
 
+    let jobStartAt = Math.min(...jobs.map(job => new Date(job.started_at)))
     const deploying_emoji = jobsCompleted ? (allSuccess ? "✅" : "❌") : "⏳"
     let description = `${deploying_emoji} ${jobsCompleted ? 'Deployed' : 'Deploying' } ${deployDescription}`
     if (jobsCompleted) {
-      let jobStartAt = Math.min(...jobs.map(job => new Date(job.started_at)))
       description += ` in ${durationToString((Date.now() - jobStartAt) / 1000)}`
     }
 
@@ -168,8 +168,13 @@ async function monitor({importantSteps, github, logJobName, deployDescription, s
       message += completed.join("\n") + "\n"
     }
 
-    console.log()
     console.log("----------\n" + message)
+
+    // If the job is completed and it has been running for a long time, delete the message so it is reposted as a new message
+    if (jobsCompleted && messageTs && (Date.now() - jobStartAt) / 1000 > longJobDuration) {
+      await slack.chat.delete({ channel: slackChannel, ts: messageTs })
+      messageTs = null
+    }
 
     if (messageTs) {
       await slack.chat.update({ ts: messageTs, channel: slackChannel, attachments: [{ color, fallback: message, blocks: formatMessage({description, active, completed, logUrl}) }] })
@@ -197,6 +202,7 @@ async function main() {
   const botToken = core.getInput('slack-bot-token', {required: true})
   const slackChannel = core.getInput('slack-channel-id', {required: true})
   const logJobName = core.getInput('log-job-name')
+  const longJobDuration = core.getInput('long-job-duration')
 
   const opts = {}
   if (debug === 'true') {
@@ -208,7 +214,7 @@ async function main() {
   const github = getOctokit(token, opts)
   const slack = new WebClient(botToken, { logLevel: LogLevel.ERROR })
 
-  await monitor({importantSteps, github, deployDescription, logJobName, stepIdentifier, slack, slackChannel})
+  await monitor({importantSteps, github, deployDescription, logJobName, stepIdentifier, slack, slackChannel, longJobDuration})
 }
 
 function handleError(err) {

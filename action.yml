@@ -28,6 +28,9 @@ inputs:
   log-job-name:
     description: 'Name of job to use for log URL'
     default: ''
+  long-job-duration:
+    description: 'Duration in seconds to consider a job long which will cause the final completed message to appear as a new message'
+    default: 300
 runs:
   using: 'node16'
   main: 'index.js'
