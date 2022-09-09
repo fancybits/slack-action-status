@@ -147,7 +147,10 @@ async function monitor({importantSteps, github, deployDescription, stepIdentifie
 
       // Clear active steps if the job is completed to mitigate
       // issues with the GitHub API returning stale data
-      active = []
+      if (active.length > 0) {
+        console.log("importantJobs = " + util.inspect(importantJobs, { depth: 8 }))
+        active = []
+      }
     }
 
     const deploying_emoji = jobsCompleted ? (allSuccess ? "✅" : "❌") : "⏳"
@@ -165,8 +168,8 @@ async function monitor({importantSteps, github, deployDescription, stepIdentifie
       message += completed.join("\n") + "\n"
     }
 
-    console.log("----------")
-    console.log(message)
+    console.log()
+    console.log("----------\n" + message)
 
     if (messageTs) {
       await slack.chat.update({ ts: messageTs, channel: slackChannel, attachments: [{ color, fallback: message, blocks: formatMessage({description, active, completed, logUrl}) }] })
@@ -177,7 +180,6 @@ async function monitor({importantSteps, github, deployDescription, stepIdentifie
       slackChannel = response.channel
     }
 
-    console.log("importantJobs = " + util.inspect(importantJobs, { depth: 8 }))
 
     if (jobsCompleted) {
       break
@@ -201,10 +203,9 @@ async function main() {
     opts.log = console
   }
 
-  const github = getOctokit(token, opts)
-
   core.debug("context = " + util.inspect(context))
 
+  const github = getOctokit(token, opts)
   const slack = new WebClient(botToken);
 
   await monitor({importantSteps, github, deployDescription, stepIdentifier, slack, slackChannel})
