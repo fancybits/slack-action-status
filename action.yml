@@ -1,0 +1,30 @@
+name: 'Slack GitHub Action Status'
+description: 'GitHub Actions status updates to Slack as jobs progress'
+inputs:
+  github-token:
+    description: The GitHub token used to create an authenticated client
+    default: ${{ github.token }}
+    required: false
+  debug:
+    description: Whether to tell the GitHub client to log details of its requests
+    default: false
+  important-steps:
+    description: 'Comma-separated list of steps that are important to report'
+    default: ''
+    required: false
+  deploy-description:
+    description: 'Description of the deployment'
+    default: ''
+    required: false
+  step-identifier:
+    description: 'Unique identifier in the name of this step (usually a UUID)'
+    required: true
+  slack-bot-token:
+    description: 'Slack bot token'
+    required: true
+  slack-channel-id:
+    description: 'Slack channel ID'
+    required: true
+runs:
+  using: 'node16'
+  main: 'index.js'
