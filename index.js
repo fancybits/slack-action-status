@@ -172,9 +172,9 @@ async function monitor({importantSteps, github, logJobName, deployDescription, s
     console.log("----------\n" + message)
 
     if (messageTs) {
-      await slack.chat.update({ ts: messageTs, channel: slackChannel, attachments: [{ color, fallback: message, blocks: formatMessage({description, active, completed, logUrl}) }] })
+      await slack.chat.update({ ts: messageTs, channel: slackChannel, text: '', attachments: [{ color, fallback: message, blocks: formatMessage({description, active, completed, logUrl}) }] })
     } else {
-      let response = await slack.chat.postMessage({ channel: slackChannel, attachments: [{ color, fallback: message, blocks: formatMessage({description, active, completed, logUrl}) }] })
+      let response = await slack.chat.postMessage({ channel: slackChannel, text: '', attachments: [{ color, fallback: message, blocks: formatMessage({description, active, completed, logUrl}) }] })
       core.debug(`response = ${util.inspect(response, { depth: 8 })}`)
       messageTs = response.ts
       slackChannel = response.channel
