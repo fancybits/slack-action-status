@@ -84,7 +84,7 @@ function formatMessage({description, active, completed, logUrl}) {
   return blocks
 }
 
-async function monitor({importantSteps, github, deployDescription, stepIdentifier, slack, slackChannel}) {
+async function monitor({importantSteps, github, logJobName, deployDescription, stepIdentifier, slack, slackChannel}) {
   let messageTs = null
 
   while (true) {
@@ -135,7 +135,7 @@ async function monitor({importantSteps, github, deployDescription, stepIdentifie
 
     const jobsCompleted = !importantJobs.find(job => job.status == "in_progress" || job.status == "queued")
     const allSuccess = !importantJobs.find(job => job.conclusion != "success")
-    const logUrl = importantJobs[0].html_url
+    const logUrl = (importantJobs.find(j => j.name.includes(logJobName)) || importantJobs[0]).html_url
 
     let color
     if (jobsCompleted) {
@@ -180,12 +180,11 @@ async function monitor({importantSteps, github, deployDescription, stepIdentifie
       slackChannel = response.channel
     }
 
-
     if (jobsCompleted) {
       break
     }
 
-    await sleep(2000)
+    await sleep(10000)
   }
 }
 
@@ -197,6 +196,7 @@ async function main() {
   const importantSteps = core.getInput('important-steps').split(',').map(s => s.trim())
   const botToken = core.getInput('slack-bot-token', {required: true})
   const slackChannel = core.getInput('slack-channel-id', {required: true})
+  const logJobName = cone.getInput('log-job-name')
 
   const opts = {}
   if (debug === 'true') {
@@ -208,7 +208,7 @@ async function main() {
   const github = getOctokit(token, opts)
   const slack = new WebClient(botToken);
 
-  await monitor({importantSteps, github, deployDescription, stepIdentifier, slack, slackChannel})
+  await monitor({importantSteps, github, deployDescription, logJobName, stepIdentifier, slack, slackChannel})
 }
 
 function handleError(err) {

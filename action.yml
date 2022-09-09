@@ -25,6 +25,9 @@ inputs:
   slack-channel-id:
     description: 'Slack channel ID'
     required: true
+  log-job-name:
+    description: 'Name of job to use for log URL'
+    default: ''
 runs:
   using: 'node16'
   main: 'index.js'
