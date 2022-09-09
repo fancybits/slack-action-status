@@ -1,7 +1,7 @@
 const core = require('@actions/core')
 const {context, getOctokit} = require('@actions/github')
 const util = require('node:util')
-const { WebClient } = require('@slack/web-api');
+const { WebClient, LogLevel } = require('@slack/web-api');
 
 process.on('unhandledRejection', handleError)
 main().catch(handleError)
@@ -172,9 +172,9 @@ async function monitor({importantSteps, github, logJobName, deployDescription, s
     console.log("----------\n" + message)
 
     if (messageTs) {
-      await slack.chat.update({ ts: messageTs, channel: slackChannel, text: '', attachments: [{ color, fallback: message, blocks: formatMessage({description, active, completed, logUrl}) }] })
+      await slack.chat.update({ ts: messageTs, channel: slackChannel, attachments: [{ color, fallback: message, blocks: formatMessage({description, active, completed, logUrl}) }] })
     } else {
-      let response = await slack.chat.postMessage({ channel: slackChannel, text: '', attachments: [{ color, fallback: message, blocks: formatMessage({description, active, completed, logUrl}) }] })
+      let response = await slack.chat.postMessage({ channel: slackChannel, attachments: [{ color, fallback: message, blocks: formatMessage({description, active, completed, logUrl}) }] })
       core.debug(`response = ${util.inspect(response, { depth: 8 })}`)
       messageTs = response.ts
       slackChannel = response.channel
@@ -206,7 +206,7 @@ async function main() {
   core.debug("context = " + util.inspect(context))
 
   const github = getOctokit(token, opts)
-  const slack = new WebClient(botToken);
+  const slack = new WebClient(botToken, { logLevel: LogLevel.ERROR })
 
   await monitor({importantSteps, github, deployDescription, logJobName, stepIdentifier, slack, slackChannel})
 }
