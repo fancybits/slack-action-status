@@ -124,6 +124,8 @@ async function monitor({importantSteps, github, logJobName, deployDescription, s
             }
 
             completed.push(`${emoji} ${step.name} completed in ${stepDuration(step)}`)
+          } else if (step.conclusion == "skipped") {
+            // all good
           } else {
             completed.push(`${step.name} failed after ${stepDuration(step)}`)
           }
