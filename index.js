@@ -196,7 +196,7 @@ async function main() {
   const importantSteps = core.getInput('important-steps').split(',').map(s => s.trim())
   const botToken = core.getInput('slack-bot-token', {required: true})
   const slackChannel = core.getInput('slack-channel-id', {required: true})
-  const logJobName = cone.getInput('log-job-name')
+  const logJobName = core.getInput('log-job-name')
 
   const opts = {}
   if (debug === 'true') {
