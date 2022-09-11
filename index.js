@@ -117,7 +117,10 @@ async function monitor({importantSteps, github, logJobName, deployDescription, s
     if (completed && importantJobStartAt) {
       description += ` in ${durationToString((Date.now() - importantJobStartAt) / 1000)}`
       if (jobStartAt < importantJobStartAt) {
-        description += ` (queued ${durationToString((importantJobStartAt - jobStartAt) / 1000)})`
+        let secs = (importantJobStartAt - jobStartAt) / 1000
+        if (secs > 10) {
+          description += ` (queued ${durationToString(secs)})`
+        }
       }
     }
   }
@@ -142,7 +145,7 @@ async function monitor({importantSteps, github, logJobName, deployDescription, s
         attempt_number: process.env.GITHUB_RUN_ATTEMPT,
       });
 
-      console.log(util.inspect(jobs, { depth: 8 }))
+      // console.log(util.inspect(jobs, { depth: 8 }))
 
       // Use this special identifier to find the job that is running this action
       const statusJob = jobs.find(job =>
