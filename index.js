@@ -88,7 +88,7 @@ function formatMessage({description, active, completed, logUrl}) {
 }
 
 async function monitor({importantSteps, github, logJobName, deployDescription, stepIdentifier, slack, slackChannel, longJobDuration}) {
-  let messageTs, message, jobStartAt
+  let messageTs, message, jobStartAt, importantJobStartAt
   let description, logUrl
   let active = []
   let completed = []
@@ -114,8 +114,11 @@ async function monitor({importantSteps, github, logJobName, deployDescription, s
   const updateDescription = (completed, success) => {
     let emoji = completed ? (success ? "✅" : "❌") : "⏳"
     description = `${emoji} ${completed ? 'Deployed' : 'Deploying' } ${deployDescription}`
-    if (completed && jobStartAt) {
-      description += ` in ${durationToString((Date.now() - jobStartAt) / 1000)}`
+    if (completed && importantJobStartAt) {
+      description += ` in ${durationToString((Date.now() - importantJobStartAt) / 1000)}`
+      if (jobStartAt < importantJobStartAt) {
+        description += ` (queued ${durationToString((importantJobStartAt - jobStartAt) / 1000)})`
+      }
     }
   }
 
@@ -162,6 +165,7 @@ async function monitor({importantSteps, github, logJobName, deployDescription, s
 
       logUrl = (importantJobs.find(j => j.name.includes(logJobName)) || importantJobs[0]).html_url
       jobStartAt = Math.min(...jobs.map(job => new Date(job.started_at)))
+      importantJobStartAt = Math.min(...importantJobs.map(job => new Date(job.started_at)))
       active = []
       completed = []
 
