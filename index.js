@@ -88,7 +88,7 @@ function formatMessage({description, active, completed, logUrl}) {
 }
 
 async function monitor({importantSteps, github, logJobName, deployDescription, stepIdentifier, slack, slackChannel, longJobDuration}) {
-  let messageTs, blocks, message, jobStartAt
+  let messageTs, message, jobStartAt
   let description, logUrl
   let active = []
   let completed = []
@@ -99,7 +99,7 @@ async function monitor({importantSteps, github, logJobName, deployDescription, s
       messageTs = null
     }
 
-    blocks = formatMessage({description, active, completed, logUrl})
+    let blocks = formatMessage({description, active, completed, logUrl})
 
     if (messageTs) {
       await slack.chat.update({ ts: messageTs, channel: slackChannel, attachments: [{ color, fallback: message, blocks }] })
