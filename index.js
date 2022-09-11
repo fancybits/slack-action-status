@@ -112,8 +112,14 @@ async function monitor({importantSteps, github, logJobName, deployDescription, s
   }
 
   const updateDescription = (completed, success) => {
-    let emoji = completed ? (success ? "✅" : "❌") : "⏳"
-    description = `${emoji} ${completed ? 'Deployed' : 'Deploying' } ${deployDescription}`
+    let emjoi = "⏳"
+    let prefix = "Deploying"
+    if (completed) {
+      emjoi = success ? "✅" : "❌"
+      prefix = success ? "Deployed" : "Failed to deploy"
+    }
+
+    description = `${emoji} ${prefix} ${deployDescription}`
     if (completed && importantJobStartAt) {
       description += ` in ${durationToString((Date.now() - importantJobStartAt) / 1000)}`
       if (jobStartAt < importantJobStartAt) {
