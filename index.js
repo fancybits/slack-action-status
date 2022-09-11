@@ -128,7 +128,7 @@ async function monitor({importantSteps, github, logJobName, deployDescription, s
   let running = true
   process.on('SIGINT', () => {
     running = false
-    reportFailure("Deploy cancelled")
+    reportFailure("⚠️ Deploy was cancelled")
   })
 
   try {
