@@ -139,7 +139,7 @@ async function monitor({importantSteps, github, logJobName, deployDescription, s
         attempt_number: process.env.GITHUB_RUN_ATTEMPT,
       });
 
-      console.log(util.inspect(data, { depth: 8 }))
+      console.log(util.inspect(jobs, { depth: 8 }))
 
       // Use this special identifier to find the job that is running this action
       const statusJob = jobs.find(job =>
