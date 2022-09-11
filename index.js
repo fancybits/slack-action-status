@@ -188,7 +188,7 @@ async function monitor({importantSteps, github, logJobName, deployDescription, s
         }
       }
 
-      const jobsCompleted = !importantJobs.find(job => job.status == "in_progress" || job.status == "queued")
+      const jobsCompleted = !importantJobs.find(job => job.status == "in_progress" || job.status == "queued" || job.status == "pending")
       const allSuccess = !importantJobs.find(job => job.conclusion != "success")
 
       let color
