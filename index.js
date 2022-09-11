@@ -89,7 +89,9 @@ function formatMessage({description, active, completed, logUrl}) {
 
 async function monitor({importantSteps, github, logJobName, deployDescription, stepIdentifier, slack, slackChannel, longJobDuration}) {
   let messageTs, blocks, message, jobStartAt
-  let description, active, completed, logUrl
+  let description, logUrl
+  let active = []
+  let completed = []
 
   const sendMessage = async ({color, republish}) => {
     if (republish && messageTs) {
