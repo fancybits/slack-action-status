@@ -133,6 +133,7 @@ async function monitor({importantSteps, github, logJobName, deployDescription, s
 
   const reportFailure = (reason) => {
     updateDescription(true, false)
+    active = []
     completed.push(reason)
     sendMessage({color: DANGER_COLOR})
   }
