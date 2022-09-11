@@ -158,7 +158,8 @@ async function monitor({importantSteps, github, logJobName, deployDescription, s
 
       logUrl = (importantJobs.find(j => j.name.includes(logJobName)) || importantJobs[0]).html_url
       jobStartAt = Math.min(...jobs.map(job => new Date(job.started_at)))
-      active, completed = [], []
+      active = []
+      completed = []
 
       for (const job of importantJobs) {
         for (const step of job.steps) {
