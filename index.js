@@ -112,10 +112,10 @@ async function monitor({importantSteps, github, logJobName, deployDescription, s
   }
 
   const updateDescription = (completed, success) => {
-    let emjoi = "⏳"
+    let emoji = "⏳"
     let prefix = "Deploying"
     if (completed) {
-      emjoi = success ? "✅" : "❌"
+      emoji = success ? "✅" : "❌"
       prefix = success ? "Deployed" : "Failed to deploy"
     }
 
