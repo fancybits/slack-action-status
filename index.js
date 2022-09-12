@@ -219,7 +219,7 @@ async function monitor({messageTs, importantSteps, github, logJobName, deployDes
 
       const jobsCompleted = !importantJobs.find(job => job.status == "in_progress" || job.status == "queued" || job.status == "pending")
       const allSuccess = !importantJobs.find(job => job.conclusion != "success")
-      const anyJobsStarted = !importantJobs.find(job => job.status != "queued" && job.status != "pending")
+      const anyJobsStarted = importantJobs.find(job => job.status != "queued" && job.status != "pending")
 
       let color
       if (jobsCompleted) {
