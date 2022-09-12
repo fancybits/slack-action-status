@@ -25,6 +25,8 @@ inputs:
   slack-channel-id:
     description: 'Slack channel ID'
     required: true
+  slack-message-ts:
+    description: 'Slack message timestamp to start updating'
   log-job-name:
     description: 'Name of job to use for log URL'
     default: ''

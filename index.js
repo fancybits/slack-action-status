@@ -87,8 +87,8 @@ function formatMessage({description, active, completed, logUrl}) {
   return blocks
 }
 
-async function monitor({importantSteps, github, logJobName, deployDescription, stepIdentifier, slack, slackChannel, longJobDuration}) {
-  let messageTs, message, jobStartAt, importantJobStartAt
+async function monitor({messageTs, importantSteps, github, logJobName, deployDescription, stepIdentifier, slack, slackChannel, longJobDuration}) {
+  let message, jobStartAt, importantJobStartAt
   let description, logUrl
   let active = []
   let completed = []
@@ -259,6 +259,7 @@ async function main() {
   const slackChannel = core.getInput('slack-channel-id', {required: true})
   const logJobName = core.getInput('log-job-name')
   const longJobDuration = core.getInput('long-job-duration')
+  const messageTs = core.getInput('slack-message-ts')
 
   const opts = {}
   if (debug === 'true') {
@@ -270,7 +271,7 @@ async function main() {
   const github = getOctokit(token, opts)
   const slack = new WebClient(botToken, { logLevel: LogLevel.ERROR })
 
-  await monitor({importantSteps, github, deployDescription, logJobName, stepIdentifier, slack, slackChannel, longJobDuration})
+  await monitor({messageTs, importantSteps, github, deployDescription, logJobName, stepIdentifier, slack, slackChannel, longJobDuration})
 }
 
 function handleError(err) {
