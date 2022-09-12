@@ -3,8 +3,10 @@ const {context, getOctokit} = require('@actions/github')
 const util = require('node:util')
 const { WebClient, LogLevel } = require('@slack/web-api');
 
-const GOOD_COLOR = "#28A745"
-const DANGER_COLOR = "#D90000"
+
+const GOOD_COLOR = "#1a7f37"
+const WARNING_COLOR = "#f2c744"
+const DANGER_COLOR = "#cf222e"
 
 process.on('unhandledRejection', handleError)
 main().catch(handleError)
@@ -145,6 +147,9 @@ async function monitor({messageTs, importantSteps, github, logJobName, deployDes
     reportFailure("⚠️ Deploy was cancelled")
   })
 
+  let statusStartedAt = new Date()
+  const elapsed = () => (Date.now() - statusStartedAt) / 1000
+
   try {
     while (running) {
       const {data: {jobs}} = await github.rest.actions.listJobsForWorkflowRunAttempt({
@@ -161,6 +166,15 @@ async function monitor({messageTs, importantSteps, github, logJobName, deployDes
           step.name.includes(stepIdentifier)))
 
       if (!statusJob) {
+        console.log("Couldn't find status job. Trying again in 2 seconds.")
+        console.log("jobs = " + util.inspect(jobs, { depth: 8 }))
+
+        // If we couldn't
+        if (elapsed() < 60) {
+          await sleep(2000)
+          continue
+        }
+
         throw new Error(`Could not find job with step identifier ${stepIdentifier}`)
       }
 
@@ -205,6 +219,7 @@ async function monitor({messageTs, importantSteps, github, logJobName, deployDes
 
       const jobsCompleted = !importantJobs.find(job => job.status == "in_progress" || job.status == "queued" || job.status == "pending")
       const allSuccess = !importantJobs.find(job => job.conclusion != "success")
+      const anyJobsStarted = !importantJobs.find(job => job.status != "queued" && job.status != "pending")
 
       let color
       if (jobsCompleted) {
@@ -220,6 +235,8 @@ async function monitor({messageTs, importantSteps, github, logJobName, deployDes
           console.log("importantJobs = " + util.inspect(importantJobs, { depth: 8 }))
           active = []
         }
+      } else if (anyJobsStarted) {
+        color = WARNING_COLOR // "warning" doesn't work
       }
 
       updateDescription(jobsCompleted, allSuccess)
