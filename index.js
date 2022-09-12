@@ -117,11 +117,12 @@ async function monitor({messageTs, importantSteps, github, logJobName, deployDes
     if (completed) {
       emoji = success ? "✅" : "❌"
       prefix = success ? "Deployed" : "Failed to deploy"
+      durationPrefix = success ? "in" : "after"
     }
 
     description = `${emoji} ${prefix} ${deployDescription}`
     if (completed && importantJobStartAt) {
-      description += ` in ${durationToString((Date.now() - importantJobStartAt) / 1000)}`
+      description += ` ${durationPrefix} ${durationToString((Date.now() - importantJobStartAt) / 1000)}`
       if (jobStartAt < importantJobStartAt) {
         let secs = (importantJobStartAt - jobStartAt) / 1000
         if (secs > 10) {
