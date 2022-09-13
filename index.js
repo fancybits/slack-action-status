@@ -241,7 +241,7 @@ async function monitor({messageTs, importantSteps, github, logJobName, deployDes
         }
       } else if (pendingJobs.length > 0) {
         for (const job of pendingJobs) {
-          active.push(`:clock3: ${job.name} queued for ${durationToString((Date.now() - new Date(job.started_at)) / 1000)}`)
+          active.push(`:clock3: ${job.name} queued for ${durationToString((Date.now() - new Date(job.started_at)) / 1000)}...`)
         }
       } else if (anyJobsStarted) {
         color = WARNING_COLOR // "warning" doesn't work
