@@ -117,7 +117,7 @@ async function monitor({messageTs, importantSteps, github, logJobName, deployDes
     let emoji = "⏳"
     let prefix = "Deploying"
     if (completed) {
-      emoji = success ? "✅" : "❌"
+      emoji = success ? ":white_check_mark:" : ":x:"
       prefix = success ? "Deployed" : "Failed to deploy"
       durationPrefix = success ? "in" : "after"
     }
@@ -190,6 +190,8 @@ async function monitor({messageTs, importantSteps, github, logJobName, deployDes
         break
       }
 
+      const pendingJobs = importantJobs.filter(job => job.status == 'pending')
+
       logUrl = (importantJobs.find(j => j.name.includes(logJobName)) || importantJobs[0]).html_url
       jobStartAt = Math.min(...jobs.map(job => new Date(job.started_at)))
       importantJobStartAt = Math.min(...importantJobs.map(job => new Date(job.started_at)))
@@ -198,7 +200,7 @@ async function monitor({messageTs, importantSteps, github, logJobName, deployDes
 
       for (const job of importantJobs) {
         for (const step of job.steps) {
-          const emoji = process.env[`STATUS_${step.name.replace(/ /g, '_').toUpperCase()}_EMOJI`] || "🛠"
+          const emoji = process.env[`STATUS_${step.name.replace(/ /g, '_').toUpperCase()}_EMOJI`] || ":hammer_and_wrench:"
 
           if (step.status == "completed") {
             if (step.conclusion == "success") {
@@ -237,6 +239,10 @@ async function monitor({messageTs, importantSteps, github, logJobName, deployDes
           console.log("importantJobs = " + util.inspect(importantJobs, { depth: 8 }))
           active = []
         }
+      } else if (pendingJobs.length > 0) {
+        for (const job of pendingJobs) {
+          active.push(`:clock3: ${job.name} queued for ${durationToString((Date.now() - new Date(job.created_at)) / 1000)}`)
+        }
       } else if (anyJobsStarted) {
         color = WARNING_COLOR // "warning" doesn't work
       }
@@ -264,7 +270,7 @@ async function monitor({messageTs, importantSteps, github, logJobName, deployDes
       await sleep(10000)
     }
   } catch (error) {
-    reportFailure("⚠️ Status reporter failed: " + error.message)
+    reportFailure(":warning: Status reporter failed: " + error.message)
     throw error
   }
 }
