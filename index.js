@@ -158,7 +158,9 @@ async function monitor({messageTs, importantSteps, github, logJobName, deployDes
         attempt_number: process.env.GITHUB_RUN_ATTEMPT,
       });
 
-      // console.log(util.inspect(jobs, { depth: 8 }))
+      if (process.env.SLACK_ACTION_STATUS_DEBUG == "true") {
+        console.log(util.inspect(jobs, { depth: 8 }))
+      }
 
       // Use this special identifier to find the job that is running this action
       const statusJob = jobs.find(job =>
