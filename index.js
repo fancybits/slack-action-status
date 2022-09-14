@@ -8,8 +8,14 @@ const GOOD_COLOR = "#1a7f37"
 const WARNING_COLOR = "#f2c744"
 const DANGER_COLOR = "#cf222e"
 
+const CLOCK_EMOJIS = Array.from({length: 12}, (_, key) => [ `:clock${key+1}:`, `:clock${key+1}30:`] ).flat()
+
 process.on('unhandledRejection', handleError)
 main().catch(handleError)
+
+function secondsToClockEmoji(seconds) {
+  return CLOCK_EMOJIS[Math.floor(seconds / 30) % CLOCK_EMOJIS.length]
+}
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
@@ -241,7 +247,8 @@ async function monitor({messageTs, importantSteps, github, logJobName, deployDes
         }
       } else if (pendingJobs.length > 0) {
         for (const job of pendingJobs) {
-          active.push(`:clock3: ${job.name} queued for ${durationToString((Date.now() - new Date(job.started_at)) / 1000)}...`)
+          const duration = (Date.now() - new Date(job.started_at)) / 1000
+          active.push(`${secondsToClockEmoji(duration)} ${job.name} queued for ${durationToString(duration)}...`)
         }
       } else if (anyJobsStarted) {
         color = WARNING_COLOR // "warning" doesn't work
