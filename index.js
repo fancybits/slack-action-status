@@ -14,7 +14,7 @@ process.on('unhandledRejection', handleError)
 main().catch(handleError)
 
 function secondsToClockEmoji(seconds) {
-  return CLOCK_EMOJIS[Math.floor(seconds / 30) % CLOCK_EMOJIS.length]
+  return CLOCK_EMOJIS[Math.floor(seconds / 10) % CLOCK_EMOJIS.length]
 }
 
 function sleep(ms) {
