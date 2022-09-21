@@ -100,6 +100,7 @@ async function monitor({messageTs, importantSteps, github, logJobName, deployDes
   let description, logUrl
   let active = []
   let completed = []
+  let maxTimePending = 0
 
   const sendMessage = async ({color, republish}) => {
     if (republish && messageTs) {
@@ -131,11 +132,8 @@ async function monitor({messageTs, importantSteps, github, logJobName, deployDes
     description = `${emoji} ${prefix} ${deployDescription}`
     if (completed && importantJobStartAt) {
       description += ` ${durationPrefix} ${durationToString((Date.now() - importantJobStartAt) / 1000)}`
-      if (jobStartAt < importantJobStartAt) {
-        let secs = (importantJobStartAt - jobStartAt) / 1000
-        if (secs > 10) {
-          description += ` (queued ${durationToString(secs)})`
-        }
+      if (maxTimePending > 10) {
+        description += ` (queued ${durationToString(maxTimePending)})`
       }
     }
   }
@@ -248,6 +246,9 @@ async function monitor({messageTs, importantSteps, github, logJobName, deployDes
       } else if (pendingJobs.length > 0) {
         for (const job of pendingJobs) {
           const duration = (Date.now() - new Date(job.started_at)) / 1000
+          if (duration > maxTimePending) {
+            maxTimePending = duration
+          }
           active.push(`${secondsToClockEmoji(duration)} ${job.name} queued for ${durationToString(duration)}...`)
         }
       } else if (anyJobsStarted) {
