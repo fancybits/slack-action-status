@@ -45,6 +45,9 @@ function durationToString(seconds) {
 function stepDuration(step) {
   let startedAt = new Date(step.started_at);
   let completedAt = new Date(step.completed_at || Date.now());
+
+  console.log(`step = ${util.inspect(step, { depth: 8 })}`);
+
   return durationToString((completedAt - startedAt) / 1000);
 }
 
