@@ -229,6 +229,7 @@ async function monitor({
       );
 
       logUrl = (
+        pendingJobs.find((j) => j.name.includes(logJobName)) ||
         importantJobs.find((j) => j.name.includes(logJobName)) ||
         importantJobs[0]
       ).html_url;
