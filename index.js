@@ -237,9 +237,9 @@ async function monitor({
       );
 
       logUrl = (
-        inProgressJobs.find((j) => j.name.includes(logJobName)) ||
-        failedJobs.find((j) => j.name.includes(logJobName)) ||
         importantJobs.find((j) => j.name.includes(logJobName)) ||
+        inProgressJobs[0] ||
+        failedJobs[0] ||
         importantJobs[0]
       ).html_url;
       jobStartAt = Math.min(...jobs.map((job) => new Date(job.started_at)));
