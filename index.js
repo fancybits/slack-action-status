@@ -237,7 +237,9 @@ async function monitor({
       );
 
       logUrl = (
-        importantJobs.find((j) => j.name.includes(logJobName)) ||
+        importantJobs.find(
+          (j) => logJobName != "" && j.name.includes(logJobName)
+        ) ||
         inProgressJobs[0] ||
         failedJobs[0] ||
         importantJobs[0]
