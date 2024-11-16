@@ -228,8 +228,17 @@ async function monitor({
         (job) => job.status == "pending"
       );
 
+      const inProgressJobs = importantJobs.filter(
+        (job) => job.status == "in_progress"
+      );
+
+      const failedJobs = importantJobs.filter(
+        (job) => job.conclusion == "failure"
+      );
+
       logUrl = (
-        pendingJobs.find((j) => j.name.includes(logJobName)) ||
+        inProgressJobs.find((j) => j.name.includes(logJobName)) ||
+        failedJobs.find((j) => j.name.includes(logJobName)) ||
         importantJobs.find((j) => j.name.includes(logJobName)) ||
         importantJobs[0]
       ).html_url;
