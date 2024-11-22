@@ -288,7 +288,7 @@ async function monitor({
           job.status == "pending"
       );
       const allSuccess = !importantJobs.find(
-        (job) => job.conclusion != "success"
+        (job) => job.conclusion != "success" && job.conclusion != "skipped"
       );
       const anyJobsStarted = importantJobs.find(
         (job) => job.status != "queued" && job.status != "pending"
