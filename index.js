@@ -102,6 +102,40 @@ function formatMessage({ description, active, completed, logUrl }) {
   return blocks;
 }
 
+function titleCase(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function conjugatePastTense(verb) {
+  // Simple past tense rules for English - not perfect but handles common cases
+  if (verb.endsWith('e')) {
+    return verb + 'd';
+  } else if (verb.endsWith('y')) {
+    return verb.slice(0, -1) + 'ied';
+  } else {
+    return verb + 'ed';
+  }
+}
+
+function getVerbForms(baseVerb) {
+  // Convert to lowercase for consistency
+  baseVerb = baseVerb.toLowerCase();
+
+  // Get continuous form (present participle)
+  let continuous;
+  if (baseVerb.endsWith('e')) {
+    continuous = baseVerb.slice(0, -1) + 'ing';
+  } else {
+    continuous = baseVerb + 'ing';
+  }
+
+  return {
+    base: baseVerb,           // deploy
+    continuous: continuous,    // deploying
+    past: conjugatePastTense(baseVerb)  // deployed
+  };
+}
+
 async function monitor({
   messageTs,
   importantSteps,
@@ -112,6 +146,8 @@ async function monitor({
   slack,
   slackChannel,
   longJobDuration,
+  republishLongJobs,
+  verbForms,
 }) {
   let message, jobStartAt, importantJobStartAt;
   let description, logUrl;
@@ -146,10 +182,12 @@ async function monitor({
 
   const updateDescription = (completed, success) => {
     let emoji = "⏳";
-    let prefix = "Deploying";
+    let prefix = titleCase(verbForms.continuous);
     if (completed) {
       emoji = success ? ":white_check_mark:" : ":x:";
-      prefix = success ? "Deployed" : "Failed to deploy";
+      prefix = success ?
+        titleCase(verbForms.past) :
+        `Failed to ${verbForms.base}`;
       durationPrefix = success ? "in" : "after";
     }
 
@@ -282,10 +320,7 @@ async function monitor({
       }
 
       const jobsCompleted = !importantJobs.find(
-        (job) =>
-          job.status == "in_progress" ||
-          job.status == "queued" ||
-          job.status == "pending"
+        (job) => job.status != "completed"
       );
       const allSuccess = !importantJobs.find(
         (job) => job.conclusion != "success" && job.conclusion != "skipped"
@@ -338,9 +373,9 @@ async function monitor({
 
       console.log("----------\n" + message);
 
-      // If the job is completed and it has been running for a long time, delete the message so it is reposted as a new message
+      // If the job is completed and it has been running for a long time, optionally delete the message so it is reposted as a new message
       let republish =
-        jobsCompleted && (Date.now() - jobStartAt) / 1000 > longJobDuration;
+        republishLongJobs && jobsCompleted && (Date.now() - jobStartAt) / 1000 > longJobDuration;
       sendMessage({ color, republish });
 
       if (jobsCompleted) {
@@ -361,9 +396,9 @@ async function main() {
   const stepIdentifier = core.getInput("step-identifier", { required: true });
   const deployDescription =
     core.getInput("deploy-description") ||
-    `${context.repository.repo} from \`${
-      context.ref_name
-    }\` (${context.sha.substring(0, 7)})`;
+      `${context.repository.repo} from \`${
+        context.ref_name
+      }\` (${context.sha.substring(0, 7)})`;
   const importantSteps = core
     .getInput("important-steps")
     .split(",")
@@ -372,7 +407,17 @@ async function main() {
   const slackChannel = core.getInput("slack-channel-id", { required: true });
   const logJobName = core.getInput("log-job-name");
   const longJobDuration = core.getInput("long-job-duration");
+  const republishLongJobs = core.getInput("republish-long-jobs") !== "false";
   const messageTs = core.getInput("slack-message-ts");
+
+  // Get the base verb and derive its forms
+  const baseVerb = core.getInput("verb") || "deploy";
+  const verbForms = getVerbForms(baseVerb);
+
+  // Allow override of past tense if needed
+  if (core.getInput("verb-past")) {
+    verbForms.past = core.getInput("verb-past");
+  }
 
   const opts = {};
   if (debug === "true") {
@@ -394,6 +439,8 @@ async function main() {
     slack,
     slackChannel,
     longJobDuration,
+    republishLongJobs,
+    verbForms,
   });
 }
 

@@ -33,6 +33,17 @@ inputs:
   long-job-duration:
     description: 'Duration in seconds to consider a job long which will cause the final completed message to appear as a new message'
     default: 300
+  republish-long-jobs:
+    description: 'Whether to republish completed messages for long-running jobs as new messages'
+    default: true
+  verb:
+    description: 'The action being performed (e.g., "deploy", "test"). Used as the base verb in status messages and to derive other verb forms. Past tense can be overridden with verb-past.'
+    required: false
+    default: 'deploy'
+  verb-past:
+    description: 'Optional override for the past tense of the verb (e.g., "built" instead of "builded"). If not provided, will be automatically derived from the base verb.'
+    required: false
+
 runs:
   using: 'node16'
   main: 'index.js'
