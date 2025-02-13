@@ -110,7 +110,7 @@ function conjugatePastTense(verb) {
   // Simple past tense rules for English - not perfect but handles common cases
   if (verb.endsWith('e')) {
     return verb + 'd';
-  } else if (verb.endsWith('y')) {
+  } else if (verb.endsWith('y') && !verb.endsWith('oy')) {  // Don't change 'oy' endings
     return verb.slice(0, -1) + 'ied';
   } else {
     return verb + 'ed';
